@@ -9,8 +9,10 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/efy/placeholder"
+	"golang.org/x/image/colornames"
 )
 
 var (
@@ -89,7 +91,7 @@ func extractDimensions(path string) (int, int) {
 func extractColor(path string) color.RGBA {
 	c := color.RGBA{}
 
-	re := regexp.MustCompile(`\/.+\/(.{6})`)
+	re := regexp.MustCompile(`\/.+\/(.+)\/?.*`)
 	m := re.FindAllStringSubmatch(path, 1)
 
 	if len(m) == 0 {
@@ -97,7 +99,13 @@ func extractColor(path string) color.RGBA {
 	}
 
 	if len(m[0]) <= 2 {
-		col, err := hexToRGBA(m[0][1])
+		cs := strings.ToLower(m[0][1])
+
+		if col, ok := colornames.Map[cs]; ok {
+			return col
+		}
+
+		col, err := hexToRGBA(cs)
 		if err != nil {
 			return c
 		}

@@ -85,6 +85,14 @@ func TestExtractColor(t *testing.T) {
 			"/400/ffffff",
 			color.RGBA{255, 255, 255, 255},
 		},
+		{
+			"/400/violet",
+			color.RGBA{238, 130, 238, 255},
+		},
+		{
+			"/400/Wheat",
+			color.RGBA{245, 222, 179, 255},
+		},
 	}
 
 	for _, tr := range tt {
