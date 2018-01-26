@@ -45,21 +45,32 @@ func TestExtractDimensions(t *testing.T) {
 
 func TestHexToRGBA(t *testing.T) {
 	tt := []struct {
-		in  string
-		out color.RGBA
+		in        string
+		out       color.RGBA
+		shoulderr bool
 	}{
 		{
 			"ffffff",
 			color.RGBA{255, 255, 255, 255},
+			false,
+		},
+		{
+			"fff",
+			color.RGBA{0, 0, 0, 255},
+			true,
 		},
 	}
 
 	for _, tr := range tt {
 		t.Run(tr.in, func(t *testing.T) {
-			col, _ := hexToRGBA(tr.in)
+			col, err := hexToRGBA(tr.in)
 			if tr.out != col {
 				t.Error("expected", tr.out)
 				t.Error("got     ", col)
+			}
+
+			if err != nil && tr.shoulderr == false {
+				t.Error("unexpected error:", err)
 			}
 		})
 	}

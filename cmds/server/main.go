@@ -9,7 +9,6 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/efy/placeholder"
 )
@@ -41,46 +40,13 @@ func placeholderHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parts := strings.Split(r.URL.Path, "/")
-	width := 600
-	height := 400
-
-	if len(parts) >= 2 {
-		dimensions := strings.Split(parts[1], "x")
-		le := len(dimensions)
-
-		if le == 2 {
-			w, err := strconv.ParseInt(dimensions[0], 10, 32)
-			if err != nil {
-				log.Println("error converting width to integer")
-				rw.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			h, err := strconv.ParseInt(dimensions[1], 10, 32)
-			if err != nil {
-				log.Println("error converting height to integer")
-				rw.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			width = int(w)
-			height = int(h)
-		}
-
-		if le == 1 {
-			w, err := strconv.ParseInt(dimensions[0], 10, 32)
-			if err != nil {
-				log.Println("error converting width to integer")
-				rw.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			width = int(w)
-			height = int(w)
-		}
-	}
+	width, height := extractDimensions(r.URL.Path)
+	color := extractColor(r.URL.Path)
 
 	phOpts := &placeholder.ImageOptions{
 		Width:  width,
 		Height: height,
+		Color:  color,
 	}
 	ph, err := placeholder.GenerateImage(phOpts)
 	if err != nil {
@@ -144,15 +110,10 @@ func extractColor(path string) color.RGBA {
 func hexToRGBA(hex string) (color.RGBA, error) {
 	var r, g, b uint8
 	l := len(hex)
-	c := color.RGBA{}
+	c := color.RGBA{0, 0, 0, 255}
 
-	if l != 3 && l != 6 {
+	if l != 6 {
 		return c, fmt.Errorf("invalid hex string")
-	}
-
-	// Handle shorthand hex
-	if l < 6 {
-		hex += hex
 	}
 
 	if l == 6 {
