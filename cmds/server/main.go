@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -21,7 +22,15 @@ var (
 func main() {
 	flag.Parse()
 
-	log.Println("starting image placeholder server")
+	// Handle setting the port from an environment variable
+	// when running in a heroku like environment
+	port := os.Getenv("PORT")
+	if port != "" {
+		port = ":" + port
+		addr = &port
+	}
+
+	log.Println("starting image placeholder server on port", *addr)
 
 	http.HandleFunc("/", placeholderHandler)
 
