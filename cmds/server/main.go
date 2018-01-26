@@ -1,18 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"flag"
-	"fmt"
-	"image"
-	"image/color"
-	"image/draw"
-	"image/png"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/efy/placeholder"
 )
 
 var (
@@ -79,11 +75,11 @@ func placeholderHandler(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	phOpts := &PlaceholderOptions{
+	phOpts := &placeholder.ImageOptions{
 		Width:  width,
 		Height: height,
 	}
-	ph, err := GeneratePlaceholder(phOpts)
+	ph, err := placeholder.GenerateImage(phOpts)
 	if err != nil {
 		log.Println(err)
 		return
@@ -92,25 +88,4 @@ func placeholderHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "image/png")
 	rw.Header().Set("Content-Length", strconv.Itoa(len(*ph)))
 	rw.Write(*ph)
-}
-
-type PlaceholderOptions struct {
-	Width  int
-	Height int
-}
-
-// GeneratePlaceholder creates and encodes a png image with the given placeholder options
-func GeneratePlaceholder(opts *PlaceholderOptions) (*[]byte, error) {
-	// Create the blank graphic
-	m := image.NewRGBA(image.Rect(0, 0, opts.Width, opts.Height))
-	color := color.RGBA{0, 0, 0, 255}
-	draw.Draw(m, m.Bounds(), &image.Uniform{color}, image.ZP, draw.Src)
-
-	// Encode as a png
-	buf := new(bytes.Buffer)
-	if err := png.Encode(buf, m); err != nil {
-		return nil, fmt.Errorf("error encoding image")
-	}
-	byt := buf.Bytes()
-	return &byt, nil
 }
