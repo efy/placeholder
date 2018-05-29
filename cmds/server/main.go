@@ -38,6 +38,14 @@ func main() {
 }
 
 func placeholderHandler(rw http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/" {
+		host, _ := os.Hostname()
+		fmt.Fprintf(rw, "Placeholder image service\n")
+		fmt.Fprintf(rw, "Usage:\n")
+		fmt.Fprintf(rw, "\thttp://%s/{width}x{height}/{color}", host)
+		return
+	}
+
 	if r.URL.Path == "/favicon.ico" {
 		return
 	}
